@@ -9,9 +9,12 @@
   </head>
   <body>
     <video id="camera" autoplay playsinline></video>
-    <canvas id="canvas" class="hidden"></canvas>
-    <button id="snap">📸 Take Photo</button>
-    <button id="upload" disabled>☁️ Upload</button>
+<div style="margin-top: 1rem;">
+  <button id="snap">📸 Take Picture</button>
+  <button id="flip">🔄 Flip Camera</button>
+</div>
+<canvas id="canvas" style="display: none;"></canvas>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

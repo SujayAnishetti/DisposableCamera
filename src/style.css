@@ -29,3 +29,13 @@ button {
 .hidden {
   display: none;
 }
+/* Disable pinch-to-zoom and double-tap zoom */
+html, body {
+  touch-action: none; /* Prevents pinch-to-zoom */
+  -ms-touch-action: none; /* For older versions of Internet Explorer */
+  user-select: none; /* Optional: Prevent text selection */
+}
+
+body {
+  overscroll-behavior: none; /* Prevents scroll behavior from triggering zoom */
+}

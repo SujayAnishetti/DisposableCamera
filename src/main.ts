@@ -16,6 +16,27 @@ let isUploading = false
 let uploadedCount = 0
 const uploadQueue: Blob[] = []
 
+// Check for camera permission (use LocalStorage to avoid asking on page refresh)
+const isCameraPermissionGranted = localStorage.getItem('cameraPermission') === 'granted';
+
+// Request camera access only if permission hasn't been granted before
+async function requestCameraPermission() {
+  try {
+    const permissionStatus = await navigator.permissions.query({ name: 'camera' });
+
+    if (permissionStatus.state === 'granted') {
+      localStorage.setItem('cameraPermission', 'granted');
+      startCamera(true); // Start the camera with front view (or your default)
+    } else {
+      // Handle permission denied or prompt user accordingly
+      alert('Camera permission is required to take photos.');
+    }
+  } catch (err) {
+    console.error("Error accessing camera permission", err);
+    alert("Camera permission request failed.");
+  }
+}
+
 // Start camera
 async function startCamera(front: boolean) {
   if (currentStream) {
@@ -132,5 +153,20 @@ getAllQueued().then(blobs => {
   processQueue()
 })
 
-// Start with front camera
-startCamera(true)
+// Check if camera permission is already granted
+if (isCameraPermissionGranted) {
+  startCamera(true); // Start the camera automatically if permission was granted before
+} else {
+  requestCameraPermission(); // Request permission if not already granted
+}
+// Prevent double-tap zoom on mobile
+document.addEventListener('dblclick', (event) => {
+  event.preventDefault();
+}, { passive: false });
+
+// Prevent pinch-to-zoom
+document.addEventListener('wheel', (event) => {
+  if (event.ctrlKey) {
+    event.preventDefault();
+  }
+}, { passive: false });

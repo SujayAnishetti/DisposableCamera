@@ -13,31 +13,9 @@ const statusText = document.getElementById('upload-status') as HTMLDivElement
 let currentStream: MediaStream | null = null
 let usingFrontCamera = true
 let isUploading = false
-let uploadedCount = 0
 const uploadQueue: Blob[] = []
 
-// Check for camera permission (use LocalStorage to avoid asking on page refresh)
-const isCameraPermissionGranted = localStorage.getItem('cameraPermission') === 'granted';
-
-// Request camera access only if permission hasn't been granted before
-async function requestCameraPermission() {
-  try {
-    const permissionStatus = await navigator.permissions.query({ name: 'camera' });
-
-    if (permissionStatus.state === 'granted') {
-      localStorage.setItem('cameraPermission', 'granted');
-      startCamera(true); // Start the camera with front view (or your default)
-    } else {
-      // Handle permission denied or prompt user accordingly
-      alert('Camera permission is required to take photos.');
-    }
-  } catch (err) {
-    console.error("Error accessing camera permission", err);
-    alert("Camera permission request failed.");
-  }
-}
-
-// Start camera
+// Camera setup
 async function startCamera(front: boolean) {
   if (currentStream) {
     currentStream.getTracks().forEach(track => track.stop())
@@ -45,7 +23,7 @@ async function startCamera(front: boolean) {
 
   const constraints = {
     video: {
-      facingMode: front ? 'user' : 'environment' // Update to use string values directly
+      facingMode: front ? 'user' : { exact: 'environment' }
     }
   }
 
@@ -60,7 +38,7 @@ async function startCamera(front: boolean) {
   }
 }
 
-// Take photo
+// Take picture
 snapBtn.onclick = () => {
   const width = video.videoWidth
   const height = video.videoHeight
@@ -89,7 +67,7 @@ flipBtn.onclick = () => {
   startCamera(!usingFrontCamera)
 }
 
-// Add image to upload queue
+// Queue handler
 function enqueueImage(blob: Blob) {
   uploadQueue.push(blob)
   addToQueue(blob)
@@ -97,7 +75,6 @@ function enqueueImage(blob: Blob) {
   processQueue()
 }
 
-// Handle the upload queue
 async function processQueue() {
   if (isUploading || uploadQueue.length === 0) return
 
@@ -107,10 +84,9 @@ async function processQueue() {
   try {
     await uploadImage(blob)
     await removeFirstFromQueue()
-    uploadedCount++
     console.log("✅ Uploaded one image.")
   } catch (err) {
-    console.error("❌ Upload failed. Retrying later...", err)
+    console.error("❌ Upload failed. Will retry...", err)
     uploadQueue.unshift(blob)
     await wait(5000)
   }
@@ -120,10 +96,10 @@ async function processQueue() {
   processQueue()
 }
 
-// Update progress bar UI
+// Show progress
 function updateProgressUI() {
-  const total = uploadedCount + uploadQueue.length + (isUploading ? 1 : 0)
-  const uploaded = uploadedCount + (isUploading ? 1 : 0)
+  const total = uploadQueue.length + (isUploading ? 1 : 0)
+  const uploaded = isUploading ? 1 : 0
 
   progressBar.max = total
   progressBar.value = uploaded
@@ -140,25 +116,21 @@ function updateProgressUI() {
   }
 }
 
-// Delay helper
+// Delay util
 function wait(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-// Load previously queued blobs from IndexedDB
+// Load existing queue from IndexedDB
 getAllQueued().then(blobs => {
-  uploadedCount = 0
   blobs.forEach(blob => uploadQueue.push(blob))
   updateProgressUI()
   processQueue()
 })
 
-// Check if camera permission is already granted
-if (isCameraPermissionGranted) {
-  startCamera(true); // Start the camera automatically if permission was granted before
-} else {
-  requestCameraPermission(); // Request permission if not already granted
-}
+// Init camera
+startCamera(true)
+
 // Prevent double-tap zoom on mobile
 document.addEventListener('dblclick', (event) => {
   event.preventDefault();
@@ -170,3 +142,4 @@ document.addEventListener('wheel', (event) => {
     event.preventDefault();
   }
 }, { passive: false });
+

@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
+    <div id="progress-container" style="padding: 10px; text-align: center;">
+      <progress id="upload-progress" max="1" value="0" style="width: 80%; height: 20px;"></progress>
+      <div id="upload-status" style="margin-top: 5px; font-size: 14px;">0 / 0 uploaded</div>
+    </div>
+    
     <video id="camera" autoplay playsinline></video>
 <div style="margin-top: 1rem;">
   <button id="snap">📸 Take Picture</button>

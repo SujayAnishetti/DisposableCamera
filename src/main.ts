@@ -45,7 +45,7 @@ async function startCamera(front: boolean) {
 
   const constraints = {
     video: {
-      facingMode: front ? 'user' : { exact: 'environment' }
+      facingMode: front ? 'user' : 'environment' // Update to use string values directly
     }
   }
 

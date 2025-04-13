@@ -13,9 +13,10 @@ const statusText = document.getElementById('upload-status') as HTMLDivElement
 let currentStream: MediaStream | null = null
 let usingFrontCamera = true
 let isUploading = false
+let uploadedCount = 0
 const uploadQueue: Blob[] = []
 
-// Camera setup
+// Start camera
 async function startCamera(front: boolean) {
   if (currentStream) {
     currentStream.getTracks().forEach(track => track.stop())
@@ -38,7 +39,7 @@ async function startCamera(front: boolean) {
   }
 }
 
-// Take picture
+// Take photo
 snapBtn.onclick = () => {
   const width = video.videoWidth
   const height = video.videoHeight
@@ -67,7 +68,7 @@ flipBtn.onclick = () => {
   startCamera(!usingFrontCamera)
 }
 
-// Queue handler
+// Add image to upload queue
 function enqueueImage(blob: Blob) {
   uploadQueue.push(blob)
   addToQueue(blob)
@@ -75,6 +76,7 @@ function enqueueImage(blob: Blob) {
   processQueue()
 }
 
+// Handle the upload queue
 async function processQueue() {
   if (isUploading || uploadQueue.length === 0) return
 
@@ -84,9 +86,10 @@ async function processQueue() {
   try {
     await uploadImage(blob)
     await removeFirstFromQueue()
+    uploadedCount++
     console.log("✅ Uploaded one image.")
   } catch (err) {
-    console.error("❌ Upload failed. Will retry...", err)
+    console.error("❌ Upload failed. Retrying later...", err)
     uploadQueue.unshift(blob)
     await wait(5000)
   }
@@ -96,10 +99,10 @@ async function processQueue() {
   processQueue()
 }
 
-// Show progress
+// Update progress bar UI
 function updateProgressUI() {
-  const total = uploadQueue.length + (isUploading ? 1 : 0)
-  const uploaded = isUploading ? 1 : 0
+  const total = uploadedCount + uploadQueue.length + (isUploading ? 1 : 0)
+  const uploaded = uploadedCount + (isUploading ? 1 : 0)
 
   progressBar.max = total
   progressBar.value = uploaded
@@ -116,19 +119,20 @@ function updateProgressUI() {
   }
 }
 
-// Delay util
+// Delay helper
 function wait(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-// Load existing queue from IndexedDB
+// Load previously queued blobs from IndexedDB
 getAllQueued().then(blobs => {
+  uploadedCount = 0
   blobs.forEach(blob => uploadQueue.push(blob))
   updateProgressUI()
   processQueue()
 })
 
-// Init camera
+// Start with front camera
 startCamera(true)
 
 // Prevent double-tap zoom on mobile

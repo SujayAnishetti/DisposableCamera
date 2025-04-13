@@ -1,22 +1,22 @@
 import { uploadImage } from './uploadcare'
+import { addToQueue, getAllQueued, removeFirstFromQueue } from './db'
 
 const video = document.getElementById('camera') as HTMLVideoElement
-const canvas = document.createElement('canvas') // hidden canvas for image processing
+const canvas = document.getElementById('canvas') as HTMLCanvasElement
 const snapBtn = document.getElementById('snap') as HTMLButtonElement
 const flipBtn = document.getElementById('flip') as HTMLButtonElement
 const context = canvas.getContext('2d')!
 
 const progressBar = document.getElementById('upload-progress') as HTMLProgressElement
-const progressLabel = document.getElementById('upload-status') as HTMLDivElement
-const progressContainer = document.getElementById('progress-container')!
+const statusText = document.getElementById('upload-status') as HTMLDivElement
 
 let currentStream: MediaStream | null = null
 let usingFrontCamera = true
-const uploadQueue: Blob[] = []
 let isUploading = false
 let uploadedCount = 0
+const uploadQueue: Blob[] = []
 
-// Start camera with desired facing mode
+// Start camera
 async function startCamera(front: boolean) {
   if (currentStream) {
     currentStream.getTracks().forEach(track => track.stop())
@@ -39,25 +39,25 @@ async function startCamera(front: boolean) {
   }
 }
 
-// Take photo and enqueue for upload
+// Take photo
 snapBtn.onclick = () => {
   const width = video.videoWidth
   const height = video.videoHeight
   canvas.width = width
   canvas.height = height
 
-  context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)'
-
   if (usingFrontCamera) {
     context.save()
-    context.scale(-1, 1) // mirror for front camera
+    context.scale(-1, 1)
+    context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)'
     context.drawImage(video, -width, 0, width, height)
     context.restore()
   } else {
+    context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)'
     context.drawImage(video, 0, 0, width, height)
   }
 
-  canvas.toBlob((blob) => {
+  canvas.toBlob(blob => {
     if (!blob) return
     enqueueImage(blob)
   }, 'image/jpeg', 0.9)
@@ -68,47 +68,69 @@ flipBtn.onclick = () => {
   startCamera(!usingFrontCamera)
 }
 
-// Upload queue logic
+// Add image to upload queue
 function enqueueImage(blob: Blob) {
   uploadQueue.push(blob)
-  updateProgress()
+  addToQueue(blob)
+  updateProgressUI()
   processQueue()
 }
 
+// Handle the upload queue
 async function processQueue() {
   if (isUploading || uploadQueue.length === 0) return
 
   isUploading = true
   const blob = uploadQueue.shift()!
 
-  updateProgress()
-
   try {
     await uploadImage(blob)
+    await removeFirstFromQueue()
     uploadedCount++
     console.log("✅ Uploaded one image.")
   } catch (err) {
-    console.error("❌ Upload failed, re-queuing...", err)
+    console.error("❌ Upload failed. Retrying later...", err)
     uploadQueue.unshift(blob)
     await wait(5000)
   }
 
+  updateProgressUI()
   isUploading = false
-  updateProgress()
   processQueue()
 }
 
-function updateProgress() {
-  const total = uploadedCount + uploadQueue.length
+// Update progress bar UI
+function updateProgressUI() {
+  const total = uploadedCount + uploadQueue.length + (isUploading ? 1 : 0)
+  const uploaded = uploadedCount + (isUploading ? 1 : 0)
+
   progressBar.max = total
-  progressBar.value = uploadedCount
-  progressLabel.textContent = `${uploadedCount} / ${total} uploaded`
-  progressContainer.style.display = total === 0 ? 'none' : 'block'
+  progressBar.value = uploaded
+
+  statusText.textContent = `${uploaded} / ${total} uploaded`
+
+  // Hide progress UI when idle
+  if (total === 0) {
+    progressBar.style.visibility = 'hidden'
+    statusText.style.visibility = 'hidden'
+  } else {
+    progressBar.style.visibility = 'visible'
+    statusText.style.visibility = 'visible'
+  }
 }
 
+// Delay helper
 function wait(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-// Start app
+// Load previously queued blobs from IndexedDB
+getAllQueued().then(blobs => {
+  uploadedCount = 0
+  blobs.forEach(blob => uploadQueue.push(blob))
+  updateProgressUI()
+  processQueue()
+})
+
+// Start with front camera
 startCamera(true)

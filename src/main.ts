@@ -33,6 +33,9 @@ async function startCamera(front: boolean) {
     video.srcObject = stream
     currentStream = stream
     usingFrontCamera = front
+
+    // Apply CSS mirror flip for front camera
+    video.style.transform = front ? 'scaleX(-1)' : 'scaleX(1)'
   } catch (err) {
     console.error("Camera error:", err)
     alert("Couldn't access the camera.")
@@ -46,16 +49,23 @@ snapBtn.onclick = () => {
   canvas.width = width
   canvas.height = height
 
+  // Optional: apply slight zoom crop to reduce distortion
+  const scale = 1.1 // zoom factor
+  const zoomW = width / scale
+  const zoomH = height / scale
+  const offsetX = (width - zoomW) / 2
+  const offsetY = (height - zoomH) / 2
+
+  context.save()
+  context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)'
+
   if (usingFrontCamera) {
-    context.save()
-    context.scale(-1, 1) // Flip horizontally for front camera
-    context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)'
-    context.drawImage(video, -width, 0, width, height)
-    context.restore()
-  } else {
-    context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)'
-    context.drawImage(video, 0, 0, width, height)
+    context.translate(width, 0)
+    context.scale(-1, 1)
   }
+
+  context.drawImage(video, offsetX, offsetY, zoomW, zoomH, 0, 0, width, height)
+  context.restore()
 
   canvas.toBlob(blob => {
     if (!blob) return
@@ -63,10 +73,8 @@ snapBtn.onclick = () => {
   }, 'image/jpeg', 0.9)
 }
 
-// Flip camera (using flip icon)
+// Flip camera (flip icon)
 flipIcon.onclick = () => {
-  // Flip the video using CSS transform
-  video.style.transform = usingFrontCamera ? 'scaleX(-1)' : 'scaleX(1)'
   usingFrontCamera = !usingFrontCamera
   startCamera(usingFrontCamera)
 }
@@ -75,7 +83,6 @@ flipIcon.onclick = () => {
 function enqueueImage(blob: Blob) {
   uploadQueue.push(blob)
   addToQueue(blob)
-  updateProgressUI()
   processQueue()
 }
 
@@ -104,8 +111,8 @@ async function processQueue() {
 
 // Update progress bar UI
 function updateProgressUI() {
-  const total = uploadedCount + uploadQueue.length + (isUploading ? 1 : 0)
-  const uploaded = uploadedCount + (isUploading ? 1 : 0)
+  const total = uploadedCount + uploadQueue.length
+  const uploaded = uploadedCount
 
   progressBar.max = total
   progressBar.value = uploaded
@@ -113,13 +120,9 @@ function updateProgressUI() {
   statusText.textContent = `${uploaded} / ${total} uploaded`
 
   // Hide progress UI when idle
-  if (total === 0) {
-    progressBar.style.visibility = 'hidden'
-    statusText.style.visibility = 'hidden'
-  } else {
-    progressBar.style.visibility = 'visible'
-    statusText.style.visibility = 'visible'
-  }
+  const visible = total > 0
+  progressBar.style.visibility = visible ? 'visible' : 'hidden'
+  statusText.style.visibility = visible ? 'visible' : 'hidden'
 }
 
 // Delay helper
@@ -138,14 +141,8 @@ getAllQueued().then(blobs => {
 // Start with front camera
 startCamera(true)
 
-// Prevent double-tap zoom on mobile
-document.addEventListener('dblclick', (event) => {
-  event.preventDefault();
-}, { passive: false });
-
-// Prevent pinch-to-zoom
-document.addEventListener('wheel', (event) => {
-  if (event.ctrlKey) {
-    event.preventDefault();
-  }
-}, { passive: false });
+// Prevent double-tap zoom and pinch on mobile
+document.addEventListener('dblclick', e => e.preventDefault(), { passive: false })
+document.addEventListener('wheel', e => {
+  if (e.ctrlKey) e.preventDefault()
+}, { passive: false })

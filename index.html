@@ -12,14 +12,20 @@
       <progress id="upload-progress" max="1" value="0" style="width: 80%; height: 20px;"></progress>
       <div id="upload-status" style="margin-top: 5px; font-size: 14px;">0 / 0 uploaded</div>
     </div>
-    
-    <video id="camera" autoplay playsinline></video>
-<div style="margin-top: 1rem;">
-  <button id="snap">📸 Take Picture</button>
-  <button id="flip">🔄 Flip Camera</button>
-</div>
-<canvas id="canvas" style="display: none;"></canvas>
-
+  
+    <!-- Camera container to hold and size the video -->
+    <div class="camera-container">
+      <video id="camera" autoplay playsinline muted></video>
+      <div class="flip-icon" id="flip-icon">&#x21bb;</div> <!-- Flip icon -->
+    </div>
+  
+    <!-- Button group for snapping pictures -->
+    <div class="controls">
+      <button id="snap">Take Picture</button>
+    </div>
+  
+    <canvas id="canvas" style="display: none;"></canvas>
+  
     <script type="module" src="/src/main.ts"></script>
-  </body>
+  </body>  
 </html>

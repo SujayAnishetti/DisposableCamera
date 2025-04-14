@@ -4,7 +4,7 @@ import { addToQueue, getAllQueued, removeFirstFromQueue } from './db'
 const video = document.getElementById('camera') as HTMLVideoElement
 const canvas = document.getElementById('canvas') as HTMLCanvasElement
 const snapBtn = document.getElementById('snap') as HTMLButtonElement
-const flipBtn = document.getElementById('flip') as HTMLButtonElement
+const flipIcon = document.getElementById('flip-icon') as HTMLDivElement
 const context = canvas.getContext('2d')!
 
 const progressBar = document.getElementById('upload-progress') as HTMLProgressElement
@@ -48,7 +48,7 @@ snapBtn.onclick = () => {
 
   if (usingFrontCamera) {
     context.save()
-    context.scale(-1, 1)
+    context.scale(-1, 1) // Flip horizontally for front camera
     context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)'
     context.drawImage(video, -width, 0, width, height)
     context.restore()
@@ -63,9 +63,12 @@ snapBtn.onclick = () => {
   }, 'image/jpeg', 0.9)
 }
 
-// Flip camera
-flipBtn.onclick = () => {
-  startCamera(!usingFrontCamera)
+// Flip camera (using flip icon)
+flipIcon.onclick = () => {
+  // Flip the video using CSS transform
+  video.style.transform = usingFrontCamera ? 'scaleX(-1)' : 'scaleX(1)'
+  usingFrontCamera = !usingFrontCamera
+  startCamera(usingFrontCamera)
 }
 
 // Add image to upload queue
@@ -146,4 +149,3 @@ document.addEventListener('wheel', (event) => {
     event.preventDefault();
   }
 }, { passive: false });
-

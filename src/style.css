@@ -7,17 +7,49 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 1rem;
+  touch-action: none;
+  overscroll-behavior: none;
+  user-select: none;
 }
 
-video, canvas {
+.camera-container {
   width: 100%;
   max-width: 320px;
+  aspect-ratio: 3 / 4;
+  background: #111;
   border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease; /* Smooth flip transition */
+}
+
+.flip-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 2rem;
+  color: white;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
   margin-bottom: 1rem;
 }
 
 button {
-  margin: 0.5rem;
   padding: 1rem 2rem;
   font-size: 1.2rem;
   background: #444;
@@ -26,16 +58,14 @@ button {
   border-radius: 8px;
 }
 
-.hidden {
-  display: none;
-}
-/* Disable pinch-to-zoom and double-tap zoom */
-html, body {
-  touch-action: none; /* Prevents pinch-to-zoom */
-  -ms-touch-action: none; /* For older versions of Internet Explorer */
-  user-select: none; /* Optional: Prevent text selection */
+#upload-progress,
+#upload-status {
+  max-width: 320px;
+  width: 100%;
+  margin: 0.5rem 0;
+  text-align: center;
 }
 
-body {
-  overscroll-behavior: none; /* Prevents scroll behavior from triggering zoom */
+.hidden {
+  display: none;
 }

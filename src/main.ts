@@ -23,17 +23,11 @@ async function startCamera(front: boolean) {
   }
 
   const constraints = {
-    video: front
-      ? {
-          facingMode: 'user',
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        }
-      : {
-          facingMode: { exact: 'environment' },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-        }
+    video: {
+      facingMode: front ? 'user' : { exact: 'environment' },
+      width: { ideal: 9999 },   // absurdly high value to trigger max
+      height: { ideal: 9999 }
+    }
   }
 
   try {
@@ -41,9 +35,12 @@ async function startCamera(front: boolean) {
     video.srcObject = stream
     currentStream = stream
     usingFrontCamera = front
+
+    const settings = stream.getVideoTracks()[0].getSettings()
+    console.log(`🎥 Running at: ${settings.width}x${settings.height}`)
   } catch (err) {
     console.error("Camera error:", err)
-    alert("Couldn't access the camera.")
+    alert("Couldn't access the camera at max resolution.")
   }
 }
 

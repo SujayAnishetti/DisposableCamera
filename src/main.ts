@@ -37,9 +37,8 @@ async function startCamera(front: boolean) {
   stopStream()
 
   const devices = await getVideoInputDevices()
-
-  // Try to find the preferred camera
   let deviceId: string | undefined
+
   for (const device of devices) {
     if (front && device.label.toLowerCase().includes('front')) {
       deviceId = device.deviceId
@@ -51,7 +50,6 @@ async function startCamera(front: boolean) {
     }
   }
 
-  // If not found, fallback to the first/last
   if (!deviceId && devices.length > 0) {
     deviceId = front ? devices[0].deviceId : devices[devices.length - 1].deviceId
   }
@@ -61,7 +59,9 @@ async function startCamera(front: boolean) {
 
   const constraints = {
     video: {
-      deviceId: currentDeviceId ? { exact: currentDeviceId } : undefined
+      deviceId: currentDeviceId ? { exact: currentDeviceId } : undefined,
+      width: { ideal: 1920 },
+      height: { ideal: 1080 }
     }
   }
 
@@ -74,6 +74,7 @@ async function startCamera(front: boolean) {
     alert("Couldn't access the camera.")
   }
 }
+
 
 // Flip camera
 flipBtn.onclick = () => {

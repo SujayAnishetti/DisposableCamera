@@ -23,9 +23,17 @@ async function startCamera(front: boolean) {
   }
 
   const constraints = {
-    video: {
-      facingMode: front ? 'user' : { exact: 'environment' }
-    }
+    video: front
+      ? {
+          facingMode: 'user',
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        }
+      : {
+          facingMode: { exact: 'environment' },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+        }
   }
 
   try {

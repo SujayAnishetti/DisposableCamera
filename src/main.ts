@@ -10,6 +10,9 @@ const context = canvas.getContext('2d')!;
 const progressBar = document.getElementById('upload-progress') as HTMLProgressElement;
 const statusText = document.getElementById('upload-status') as HTMLDivElement;
 
+// UI Container
+const container = document.getElementById('video-container') as HTMLElement;
+
 let currentStream: MediaStream | null = null;
 let usingFrontCamera = true;
 let currentDeviceId: string | null = null;
@@ -80,7 +83,12 @@ async function startCamera(front: boolean) {
 
 // Scale video to fit the UI container
 function scaleVideoForUI() {
-  const container = document.getElementById('video-container') as HTMLElement;
+  // Ensure the container exists
+  if (!container) {
+    console.error('Video container not found.');
+    return;
+  }
+
   const containerWidth = container.clientWidth;
   const containerHeight = container.clientHeight;
 
@@ -112,7 +120,7 @@ snapBtn.onclick = () => {
   // Draw image to canvas with optional styling
   if (usingFrontCamera) {
     context.save();
-    context.scale(-1, 1);
+    context.scale(-1, 1); // Flip horizontally
     context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)';
     context.drawImage(video, -width, 0, width, height);
     context.restore();

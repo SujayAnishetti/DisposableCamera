@@ -16,6 +16,13 @@ let isUploading = false
 let uploadedCount = 0
 const uploadQueue: Blob[] = []
 
+declare class ImageCapture {
+  constructor(videoTrack: MediaStreamTrack)
+  takePhoto(): Promise<Blob>
+}
+
+let imageCapture: ImageCapture | null = null
+
 // Start camera
 async function startCamera(front: boolean) {
   if (currentStream) {
@@ -24,7 +31,9 @@ async function startCamera(front: boolean) {
 
   const constraints = {
     video: {
-      facingMode: front ? 'user' : { exact: 'environment' }
+      facingMode: front ? 'user' : { exact: 'environment' },
+      width: { ideal: 9999 }, // Try to get max res
+      height: { ideal: 9999 }
     }
   }
 
@@ -33,14 +42,35 @@ async function startCamera(front: boolean) {
     video.srcObject = stream
     currentStream = stream
     usingFrontCamera = front
+
+    const [track] = stream.getVideoTracks()
+    imageCapture = new ImageCapture(track)
+
+    const settings = track.getSettings()
+    console.log(`🎥 Camera running at ${settings.width}x${settings.height}`)
   } catch (err) {
     console.error("Camera error:", err)
     alert("Couldn't access the camera.")
   }
 }
 
-// Take photo
+// Take photo using ImageCapture or fallback to canvas
 snapBtn.onclick = () => {
+  if (imageCapture && 'takePhoto' in imageCapture) {
+    imageCapture.takePhoto().then(blob => {
+      console.log('📸 Captured photo via ImageCapture.')
+      enqueueImage(blob)
+    }).catch(err => {
+      console.warn('❌ ImageCapture failed, falling back to canvas.', err)
+      fallbackToCanvasCapture()
+    })
+  } else {
+    fallbackToCanvasCapture()
+  }
+}
+
+// Fallback if ImageCapture fails or is unsupported
+function fallbackToCanvasCapture() {
   const width = video.videoWidth
   const height = video.videoHeight
   canvas.width = width
@@ -109,7 +139,6 @@ function updateProgressUI() {
 
   statusText.textContent = `${uploaded} / ${total} uploaded`
 
-  // Hide progress UI when idle
   if (total === 0) {
     progressBar.style.visibility = 'hidden'
     statusText.style.visibility = 'hidden'

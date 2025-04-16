@@ -1,5 +1,5 @@
-import { uploadImage } from '../src/uploadcare';
-import { addToQueue, getAllQueued, removeFirstFromQueue } from '../src/db';
+import { uploadImage } from './uploadcare';
+import { addToQueue, getAllQueued, removeFirstFromQueue } from './db';
 
 const video = document.getElementById('camera') as HTMLVideoElement;
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;

@@ -1,0 +1,41 @@
+body {
+  margin: 0;
+  background: #000;
+  color: white;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+}
+
+video, canvas {
+  width: 100%;
+  max-width: 320px;
+  border-radius: 16px;
+  margin-bottom: 1rem;
+}
+
+button {
+  margin: 0.5rem;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  background: #444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+}
+
+.hidden {
+  display: none;
+}
+/* Disable pinch-to-zoom and double-tap zoom */
+html, body {
+  touch-action: none; /* Prevents pinch-to-zoom */
+  -ms-touch-action: none; /* For older versions of Internet Explorer */
+  user-select: none; /* Optional: Prevent text selection */
+}
+
+body {
+  overscroll-behavior: none; /* Prevents scroll behavior from triggering zoom */
+}

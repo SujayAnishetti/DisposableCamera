@@ -8,5 +8,5 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["src", "public/main.ts"]
+  "include": ["src", "src/main.ts"]
 }

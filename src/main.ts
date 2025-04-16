@@ -33,11 +33,6 @@ async function startCamera(front: boolean) {
     video.srcObject = stream
     currentStream = stream
     usingFrontCamera = front
-
-    video.onloadedmetadata = () => {
-      video.play()
-      video.style.visibility = 'visible' // 👈 Show only after it's ready
-    }
   } catch (err) {
     console.error("Camera error:", err)
     alert("Couldn't access the camera.")
@@ -80,7 +75,8 @@ flipIcon.onclick = () => {
 function enqueueImage(blob: Blob) {
   uploadQueue.push(blob)
   addToQueue(blob)
-  processQueue() // Removed updateProgressUI from here
+  updateProgressUI()
+  processQueue()
 }
 
 // Handle the upload queue
@@ -108,8 +104,8 @@ async function processQueue() {
 
 // Update progress bar UI
 function updateProgressUI() {
-  const total = uploadedCount + uploadQueue.length
-  const uploaded = uploadedCount
+  const total = uploadedCount + uploadQueue.length + (isUploading ? 1 : 0)
+  const uploaded = uploadedCount + (isUploading ? 1 : 0)
 
   progressBar.max = total
   progressBar.value = uploaded
@@ -145,11 +141,11 @@ startCamera(true)
 // Prevent double-tap zoom on mobile
 document.addEventListener('dblclick', (event) => {
   event.preventDefault();
-}, { passive: false })
+}, { passive: false });
 
 // Prevent pinch-to-zoom
 document.addEventListener('wheel', (event) => {
   if (event.ctrlKey) {
     event.preventDefault();
   }
-}, { passive: false })
+}, { passive: false });

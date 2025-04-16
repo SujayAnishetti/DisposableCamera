@@ -69,15 +69,3 @@ button {
 .hidden {
   display: none;
 }
-
-#camera {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  object-fit: cover;
-  z-index: 1;
-  background: black;
-  visibility: hidden; /* Hide until stream is ready */
-}

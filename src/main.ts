@@ -12,28 +12,56 @@ const statusText = document.getElementById('upload-status') as HTMLDivElement
 
 let currentStream: MediaStream | null = null
 let usingFrontCamera = true
-let isUploading = false
-let uploadedCount = 0
+let currentDeviceId: string | null = null
 const uploadQueue: Blob[] = []
 
-declare class ImageCapture {
-  constructor(videoTrack: MediaStreamTrack)
-  takePhoto(): Promise<Blob>
-}
+let isUploading = false
+let uploadedCount = 0
 
-let imageCapture: ImageCapture | null = null
-
-// Start camera
-async function startCamera(front: boolean) {
+// Helper to stop camera stream
+function stopStream() {
   if (currentStream) {
     currentStream.getTracks().forEach(track => track.stop())
+    currentStream = null
   }
+}
+
+// Get list of video input devices
+async function getVideoInputDevices(): Promise<MediaDeviceInfo[]> {
+  const devices = await navigator.mediaDevices.enumerateDevices()
+  return devices.filter(device => device.kind === 'videoinput')
+}
+
+// Start camera by facing mode or fallback to deviceId
+async function startCamera(front: boolean) {
+  stopStream()
+
+  const devices = await getVideoInputDevices()
+
+  // Try to find the preferred camera
+  let deviceId: string | undefined
+  for (const device of devices) {
+    if (front && device.label.toLowerCase().includes('front')) {
+      deviceId = device.deviceId
+      break
+    }
+    if (!front && device.label.toLowerCase().includes('back')) {
+      deviceId = device.deviceId
+      break
+    }
+  }
+
+  // If not found, fallback to the first/last
+  if (!deviceId && devices.length > 0) {
+    deviceId = front ? devices[0].deviceId : devices[devices.length - 1].deviceId
+  }
+
+  currentDeviceId = deviceId || null
+  usingFrontCamera = front
 
   const constraints = {
     video: {
-      facingMode: front ? 'user' : 'environment',
-      width: { ideal: 9999 }, // Try to get max res
-      height: { ideal: 9999 }
+      deviceId: currentDeviceId ? { exact: currentDeviceId } : undefined
     }
   }
 
@@ -41,36 +69,19 @@ async function startCamera(front: boolean) {
     const stream = await navigator.mediaDevices.getUserMedia(constraints)
     video.srcObject = stream
     currentStream = stream
-    usingFrontCamera = front
-
-    const [track] = stream.getVideoTracks()
-    imageCapture = new ImageCapture(track)
-
-    const settings = track.getSettings()
-    console.log(`🎥 Camera running at ${settings.width}x${settings.height}`)
   } catch (err) {
     console.error("Camera error:", err)
     alert("Couldn't access the camera.")
   }
 }
 
-// Take photo using ImageCapture or fallback to canvas
-snapBtn.onclick = () => {
-  if (imageCapture && 'takePhoto' in imageCapture) {
-    imageCapture.takePhoto().then(blob => {
-      console.log('📸 Captured photo via ImageCapture.')
-      enqueueImage(blob)
-    }).catch(err => {
-      console.warn('❌ ImageCapture failed, falling back to canvas.', err)
-      fallbackToCanvasCapture()
-    })
-  } else {
-    fallbackToCanvasCapture()
-  }
+// Flip camera
+flipBtn.onclick = () => {
+  startCamera(!usingFrontCamera)
 }
 
-// Fallback if ImageCapture fails or is unsupported
-function fallbackToCanvasCapture() {
+// Take photo
+snapBtn.onclick = () => {
   const width = video.videoWidth
   const height = video.videoHeight
   canvas.width = width
@@ -91,11 +102,6 @@ function fallbackToCanvasCapture() {
     if (!blob) return
     enqueueImage(blob)
   }, 'image/jpeg', 0.9)
-}
-
-// Flip camera
-flipBtn.onclick = () => {
-  startCamera(!usingFrontCamera)
 }
 
 // Add image to upload queue
@@ -153,7 +159,7 @@ function wait(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-// Load previously queued blobs from IndexedDB
+// Load queued blobs and resume uploads
 getAllQueued().then(blobs => {
   uploadedCount = 0
   blobs.forEach(blob => uploadQueue.push(blob))
@@ -163,3 +169,9 @@ getAllQueued().then(blobs => {
 
 // Start with front camera
 startCamera(true)
+
+// Prevent zoom on mobile
+document.addEventListener('dblclick', e => e.preventDefault(), { passive: false })
+document.addEventListener('wheel', e => {
+  if (e.ctrlKey) e.preventDefault()
+}, { passive: false })

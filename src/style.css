@@ -52,6 +52,19 @@ html, body {
   transform: scaleX(-1);
 }
 
+#splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('/image.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 9999;
+}
+
 /* Flip button - positioned at top-right */
 .flip-button {
   position: absolute;

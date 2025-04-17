@@ -63,8 +63,8 @@ async function startCamera(front: boolean) {
   const constraints = {
     video: {
       deviceId: currentDeviceId ? { exact: currentDeviceId } : undefined,
-      width: { ideal: 4096 },
-      height: { ideal: 2160 }
+      width: { ideal: 1280 },
+      height: { ideal: 720 }
     }
   };
 
@@ -74,7 +74,7 @@ async function startCamera(front: boolean) {
     currentStream = stream;
 
     // Scale video to fit UI container
-    scaleVideoForUI();
+    //scaleVideoForUI();
   } catch (err) {
     console.error('Camera error:', err);
     alert("Couldn't access the camera.");
@@ -82,27 +82,27 @@ async function startCamera(front: boolean) {
 }
 
 // Scale video to fit the UI container
-function scaleVideoForUI() {
-  // Ensure the container exists
-  if (!container) {
-    console.error('Video container not found.');
-    return;
-  }
+// function scaleVideoForUI() {
+//   // Ensure the container exists
+//   if (!container) {
+//     console.error('Video container not found.');
+//     return;
+//   }
 
-  const containerWidth = container.clientWidth;
-  const containerHeight = container.clientHeight;
+//   const containerWidth = container.clientWidth;
+//   const containerHeight = container.clientHeight;
 
-  const videoWidth = containerWidth;
-  const videoHeight = containerHeight;
+//   const videoWidth = containerWidth;
+//   const videoHeight = containerHeight;
 
-  video.style.width = '100%';
-  video.style.height = '100%';
-  video.style.objectFit = 'cover'; // Use 'cover' to fill the screen and maintain aspect ratio
+//   video.style.width = '100%';
+//   video.style.height = '100%';
+//   video.style.objectFit = 'cover'; // Use 'cover' to fill the screen and maintain aspect ratio
 
-  // Optionally, adjust the container's aspect ratio here if necessary
-  container.style.width = `${containerWidth}px`;
-  container.style.height = `${containerHeight}px`;
-}
+//   // Optionally, adjust the container's aspect ratio here if necessary
+//   container.style.width = `${containerWidth}px`;
+//   container.style.height = `${containerHeight}px`;
+// }
 
 // Flip camera
 flipBtn.onclick = () => {

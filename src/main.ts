@@ -139,16 +139,21 @@ snapBtn.onclick = () => {
 function enqueueImage(blob: Blob) {
   uploadQueue.push(blob);
   addToQueue(blob);
-  updateProgressUI();
-  processQueue();
+  
+  // Don't call updateProgressUI() here immediately
+  processQueue(); // Let this handle UI update cleanly
 }
+
+
 
 // Handle the upload queue
 async function processQueue() {
   if (isUploading || uploadQueue.length === 0) return;
 
   isUploading = true;
+
   const blob = uploadQueue.shift()!;
+  updateProgressUI(); // <-- run this AFTER popping the queue
 
   try {
     await uploadImage(blob);
@@ -161,20 +166,26 @@ async function processQueue() {
     await wait(5000);
   }
 
-  updateProgressUI();
   isUploading = false;
-  processQueue();
+  updateProgressUI(); // ← final update
+  processQueue(); // Check for next item
 }
+
+
 
 // Update progress bar UI
 function updateProgressUI() {
-  const total = uploadedCount + uploadQueue.length + (isUploading ? 1 : 0);
-  const uploaded = uploadedCount + (isUploading ? 1 : 0);
+  const queued = uploadQueue.length;
+  const uploaded = uploadedCount;
+
+  // Only count what has been uploaded or is still waiting
+  const total = uploaded + queued;
+  const progress = uploaded;
 
   progressBar.max = total;
-  progressBar.value = uploaded;
+  progressBar.value = progress;
 
-  statusText.textContent = `${uploaded} / ${total} uploaded`;
+  statusText.textContent = `${progress} / ${total} uploaded`;
 
   if (total === 0) {
     progressBar.style.visibility = 'hidden';
@@ -184,6 +195,7 @@ function updateProgressUI() {
     statusText.style.visibility = 'visible';
   }
 }
+
 
 // Delay helper
 function wait(ms: number) {

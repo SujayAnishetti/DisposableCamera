@@ -6,30 +6,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Disposable Camera</title>
     <link rel="stylesheet" href="/src/style.css" />
+    <style>
+      /* Splash screen styles */
+      #splash-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999; /* Ensures it's on top of everything else */
+      }
+
+      #splash-screen img {
+        width: 80%;
+        max-width: 300px;
+      }
+
+      /* Camera interface styles */
+      #camera-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: black;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1; /* Make sure it's beneath the splash screen */
+      }
+
+      /* Other camera and button styles */
+      /* Add styles here as needed for buttons and video stream */
+
+    </style>
   </head>
   <body>
-    <div id="camera-wrapper">
+    <!-- Splash screen -->
+    <div id="splash-screen">
+      <img id="loading-image" src="image.jpg" alt="Loading" />
+    </div>
+
+    <!-- Camera interface (hidden by default) -->
+    <div id="camera-wrapper" style="display: none;">
       <!-- Flip button in top right -->
       <button id="flip" class="flip-button" title="Flip Camera">↺</button>
-  
+
       <!-- Video stream -->
       <div id="video-container">
         <video id="camera" autoplay playsinline></video>
       </div>
-      
+
       <!-- Shutter button at bottom center -->
       <button id="snap" class="shutter-button" title="Take Picture"></button>
     </div>
-  
+
     <!-- Canvas (hidden) -->
     <canvas id="canvas" style="display: none;"></canvas>
-  
-    <!-- Upload progress (optional UI) -->
+
+    <!-- Upload progress -->
     <div id="progress-container">
       <progress id="upload-progress" max="1" value="0"></progress>
       <div id="upload-status">0 / 0 uploaded</div>
     </div>
-  
+
     <script type="module" src="/src/main.ts"></script>
+
+    <script>
+      // Fade out splash screen after 3 seconds and hide it
+      const splash = document.getElementById('splash-screen');
+      const cameraWrapper = document.getElementById('camera-wrapper');
+
+      setTimeout(() => {
+        splash.style.transition = "opacity 1s";
+        splash.style.opacity = 0;
+        
+        // After fade-out, remove splash screen and display camera
+        setTimeout(() => {
+          splash.style.display = 'none';  // Hide splash screen
+          cameraWrapper.style.display = 'flex';  // Show camera interface
+        }, 1000); // Wait for the fade-out effect to complete (1 second)
+      }, 3000); // Wait for 3 seconds before starting fade-out
+    </script>
   </body>
 </html>

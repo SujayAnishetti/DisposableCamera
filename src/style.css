@@ -17,7 +17,7 @@ html, body {
   overscroll-behavior: none;
 }
 
-/* Camera wrapper covers the full screen */
+/* Camera wrapper takes full screen */
 #camera-wrapper {
   position: fixed;
   top: 0;
@@ -25,14 +25,14 @@ html, body {
   width: 100vw;
   height: 100vh;
   background: black;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+  z-index: 0;
 }
 
-/* Video container stretches to full space */
+/* Video container to fill the screen */
 #video-container {
   position: absolute;
   top: 0;
@@ -42,12 +42,15 @@ html, body {
 }
 
 #camera {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;  /* Ensures the video fills the screen without distorting */
+  object-fit: cover;  /* Ensures the video fills the container while maintaining its aspect ratio */
 }
 
-/* Flip button - top right corner */
+/* Flip button - positioned at top-right */
 .flip-button {
   position: absolute;
   top: 16px;
@@ -62,12 +65,12 @@ html, body {
   cursor: pointer;
 }
 
-/* Flip hover effect */
+/* Flip button hover effect */
 .flip-button:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Shutter button - bottom center */
+/* Shutter button - positioned at bottom-center */
 .shutter-button {
   position: absolute;
   bottom: 32px;
@@ -100,7 +103,7 @@ html, body {
   transform: translateX(-50%) scale(0.95);
 }
 
-/* Upload progress UI */
+/* Upload progress UI (optional) */
 #progress-container {
   position: absolute;
   top: 10px;
@@ -130,8 +133,8 @@ canvas {
 /* Media Query for Landscape Mode */
 @media (orientation: landscape) {
   #camera-wrapper {
-    flex-direction: column;
-    justify-content: space-between;
+    height: 100vh;
+    width: 100vw;
   }
 
   #video-container {
@@ -153,8 +156,8 @@ canvas {
 /* Media Query for Portrait Mode */
 @media (orientation: portrait) {
   #camera-wrapper {
-    flex-direction: column;
-    justify-content: space-between;
+    height: 100vh;  /* Ensure it takes full viewport height */
+    width: 100vw;   /* Ensure it takes full viewport width */
   }
 
   #video-container {

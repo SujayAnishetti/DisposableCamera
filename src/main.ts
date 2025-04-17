@@ -92,17 +92,16 @@ function scaleVideoForUI() {
   const containerWidth = container.clientWidth;
   const containerHeight = container.clientHeight;
 
-  const aspectRatio = 4096 / 2160; // Based on the high resolution
-  let videoWidth = containerWidth;
-  let videoHeight = containerWidth / aspectRatio;
+  const videoWidth = containerWidth;
+  const videoHeight = containerHeight;
 
-  if (videoHeight > containerHeight) {
-    videoHeight = containerHeight;
-    videoWidth = containerHeight * aspectRatio;
-  }
+  video.style.width = '100%';
+  video.style.height = '100%';
+  video.style.objectFit = 'cover'; // Use 'cover' to fill the screen and maintain aspect ratio
 
-  video.style.width = `${videoWidth}px`;
-  video.style.height = `${videoHeight}px`;
+  // Optionally, adjust the container's aspect ratio here if necessary
+  container.style.width = `${containerWidth}px`;
+  container.style.height = `${containerHeight}px`;
 }
 
 // Flip camera

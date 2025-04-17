@@ -34,11 +34,12 @@ html, body {
 
 /* Video container to fill the screen */
 #video-container {
-  position: absolute;
+  position: relative;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  height: 100dvh; 
 }
 
 #camera {
@@ -48,6 +49,8 @@ html, body {
   width: 100%;
   height: 100%;
   object-fit: cover;  /* Ensures the video fills the container while maintaining its aspect ratio */
+  transform: scaleX(-1); /* Flip for front camera if needed */
+
 }
 
 /* Flip button - positioned at top-right */
@@ -73,7 +76,7 @@ html, body {
 /* Shutter button - positioned at bottom-center */
 .shutter-button {
   position: absolute;
-  bottom: 32px;
+  bottom: 100px;
   left: 50%;
   transform: translateX(-50%);
   width: 80px;
@@ -139,6 +142,7 @@ canvas {
 
   #video-container {
     height: 100%;
+    height: 100dvh; 
     width: 100%;
   }
 
@@ -162,6 +166,7 @@ canvas {
 
   #video-container {
     height: 100%;
+    height: 100dvh; 
     width: 100%;
   }
 
@@ -172,6 +177,6 @@ canvas {
   }
 
   .shutter-button {
-    bottom: 32px;
+    bottom: 100px;
   }
 }

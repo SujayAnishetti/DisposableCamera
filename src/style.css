@@ -44,7 +44,7 @@ html, body {
 #camera {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover;  /* Ensures the video fills the screen without distorting */
 }
 
 /* Flip button - top right corner */
@@ -125,4 +125,50 @@ html, body {
 /* Hidden canvas */
 canvas {
   display: none;
+}
+
+/* Media Query for Landscape Mode */
+@media (orientation: landscape) {
+  #camera-wrapper {
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  #video-container {
+    height: 100%;
+    width: 100%;
+  }
+
+  /* Adjust button positions for landscape */
+  .flip-button {
+    top: 16px;
+    right: 16px;
+  }
+
+  .shutter-button {
+    bottom: 32px;
+  }
+}
+
+/* Media Query for Portrait Mode */
+@media (orientation: portrait) {
+  #camera-wrapper {
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  #video-container {
+    height: 100%;
+    width: 100%;
+  }
+
+  /* Adjust button positions for portrait */
+  .flip-button {
+    top: 16px;
+    right: 16px;
+  }
+
+  .shutter-button {
+    bottom: 32px;
+  }
 }

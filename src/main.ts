@@ -111,28 +111,33 @@ flipBtn.onclick = () => {
 
 // Take photo
 snapBtn.onclick = () => {
-  // Get the video dimensions
   const width = video.videoWidth;
   const height = video.videoHeight;
 
-  // Set canvas size for rotated landscape
-  canvas.width = height;  // After rotation, width becomes the original height
-  canvas.height = width;  // After rotation, height becomes the original width
+  if (usingFrontCamera) {
+    // Front camera: Save as-is, no rotation
+    canvas.width = width;
+    canvas.height = height;
 
-  // Rotate the context 90 degrees counterclockwise
-  context.save();
-  context.translate(height / 2, width / 2);  // Move the origin to the center of the canvas
-  context.rotate(-Math.PI / 2);  // Rotate the context by 90 degrees counterclockwise
-  context.translate(-width / 2, -height / 2);  // Move the origin back
+    context.save();
+    context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)';
+    context.drawImage(video, 0, 0, width, height);
+    context.restore();
+  } else {
+    // Rear camera: Rotate 90° counterclockwise for landscape
+    canvas.width = height;
+    canvas.height = width;
 
-  // Apply filters and draw the video image
-  context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)';
-  context.drawImage(video, 0, 0, width, height);
+    context.save();
+    context.translate(height / 2, width / 2); // Move to center
+    context.rotate(-Math.PI / 2); // Rotate 90° CCW
+    context.translate(-width / 2, -height / 2); // Move origin back
 
-  // Restore context state after rotation
-  context.restore();
+    context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)';
+    context.drawImage(video, 0, 0, width, height);
+    context.restore();
+  }
 
-  // Save the image as JPEG and enqueue it for upload
   canvas.toBlob(blob => {
     if (!blob) return;
     enqueueImage(blob);

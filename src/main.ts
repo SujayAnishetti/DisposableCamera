@@ -119,7 +119,7 @@ snapBtn.onclick = () => {
   // Draw image to canvas with optional styling
   if (usingFrontCamera) {
     context.save();
-    context.scale(-1, 1); // Flip horizontally
+    //context.scale(-1, 1); // Flip horizontally
     context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)';
     context.drawImage(video, -width, 0, width, height);
     context.restore();

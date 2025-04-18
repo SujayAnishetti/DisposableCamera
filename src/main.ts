@@ -111,43 +111,24 @@ flipBtn.onclick = () => {
 
 // Take photo
 snapBtn.onclick = () => {
-  const originalWidth = video.videoWidth;
-  const originalHeight = video.videoHeight;
+  const width = video.videoWidth;
+  const height = video.videoHeight;
+  canvas.width = width;
+  canvas.height = height;
 
-  const isPortrait = originalHeight > originalWidth;
-
-  // Force canvas into landscape mode
-  const canvasWidth = isPortrait ? originalHeight : originalWidth;
-  const canvasHeight = isPortrait ? originalWidth : originalHeight;
-
-  canvas.width = canvasWidth;
-  canvas.height = canvasHeight;
-
-  context.save();
-  context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)';
-
-  if (isPortrait) {
-    // Rotate portrait to landscape orientation
-    context.translate(canvasWidth, 0);
-    context.rotate(Math.PI / 2);
-
-    if (usingFrontCamera) {
-      context.scale(-1, 1); // Flip horizontally
-      context.drawImage(video, 0, -originalHeight, originalWidth, originalHeight);
-    } else {
-      context.drawImage(video, 0, -originalHeight, originalWidth, originalHeight);
-    }
+  // Draw image to canvas with optional styling
+  if (usingFrontCamera) {
+    context.save();
+    context.scale(-1, 1); // Flip horizontally
+    context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)';
+    context.drawImage(video, -width, 0, width, height);
+    context.restore();
   } else {
-    if (usingFrontCamera) {
-      context.scale(-1, 1); // Flip horizontally
-      context.drawImage(video, -canvasWidth, 0, canvasWidth, canvasHeight);
-    } else {
-      context.drawImage(video, 0, 0, canvasWidth, canvasHeight);
-    }
+    context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)';
+    context.drawImage(video, 0, 0, width, height);
   }
 
-  context.restore();
-
+  // Create Blob from canvas and add to upload queue
   canvas.toBlob(blob => {
     if (!blob) return;
     enqueueImage(blob);

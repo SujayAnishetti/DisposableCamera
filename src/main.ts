@@ -111,18 +111,28 @@ flipBtn.onclick = () => {
 
 // Take photo
 snapBtn.onclick = () => {
+  // Get the video dimensions
   const width = video.videoWidth;
   const height = video.videoHeight;
 
-  // Set canvas to match the video dimensions
-  canvas.width = width;
-  canvas.height = height;
+  // Set canvas size for rotated landscape
+  canvas.width = height;  // After rotation, width becomes the original height
+  canvas.height = width;  // After rotation, height becomes the original width
 
-  // Draw the image as-is (no rotation)
+  // Rotate the context 90 degrees counterclockwise
+  context.save();
+  context.translate(height / 2, width / 2);  // Move the origin to the center of the canvas
+  context.rotate(-Math.PI / 2);  // Rotate the context by 90 degrees counterclockwise
+  context.translate(-width / 2, -height / 2);  // Move the origin back
+
+  // Apply filters and draw the video image
   context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)';
   context.drawImage(video, 0, 0, width, height);
 
-  // Save as a JPEG blob and enqueue it for upload
+  // Restore context state after rotation
+  context.restore();
+
+  // Save the image as JPEG and enqueue it for upload
   canvas.toBlob(blob => {
     if (!blob) return;
     enqueueImage(blob);

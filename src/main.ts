@@ -113,27 +113,36 @@ flipBtn.onclick = () => {
 snapBtn.onclick = () => {
   const width = video.videoWidth;
   const height = video.videoHeight;
-  canvas.width = width;
-  canvas.height = height;
 
-  // Draw image to canvas with optional styling
-  if (usingFrontCamera) {
+  const isPortrait = height > width;
+
+  if (isPortrait) {
+    // Save as landscape by rotating 90° clockwise
+    canvas.width = height;
+    canvas.height = width;
+
     context.save();
-    //context.scale(-1, 1); // Flip horizontally
+    context.translate(height, 0);
+    context.rotate(Math.PI / 2);
+
     context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)';
-    context.drawImage(video, -width, 0, width, height);
+    context.drawImage(video, 0, 0, width, height);
     context.restore();
   } else {
+    // Already landscape – no rotation needed
+    canvas.width = width;
+    canvas.height = height;
+
     context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)';
     context.drawImage(video, 0, 0, width, height);
   }
 
-  // Create Blob from canvas and add to upload queue
   canvas.toBlob(blob => {
     if (!blob) return;
     enqueueImage(blob);
   }, 'image/jpeg', 0.9);
 };
+
 
 // Add image to upload queue
 function enqueueImage(blob: Blob) {

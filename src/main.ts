@@ -72,6 +72,8 @@ async function startCamera(front: boolean) {
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     video.srcObject = stream;
     currentStream = stream;
+    video.style.transform = front ? 'scaleX(-1)' : 'none';
+
 
     // Scale video to fit UI container
     //scaleVideoForUI();

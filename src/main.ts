@@ -114,29 +114,15 @@ snapBtn.onclick = () => {
   const width = video.videoWidth;
   const height = video.videoHeight;
 
-  const isPortrait = height > width;
+  // Set canvas to match the video dimensions
+  canvas.width = width;
+  canvas.height = height;
 
-  if (isPortrait) {
-    // Save as landscape by rotating 90° clockwise
-    canvas.width = height;
-    canvas.height = width;
+  // Draw the image as-is (no rotation)
+  context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)';
+  context.drawImage(video, 0, 0, width, height);
 
-    context.save();
-    context.translate(height, 0);
-    context.rotate(Math.PI / 2);
-
-    context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)';
-    context.drawImage(video, 0, 0, width, height);
-    context.restore();
-  } else {
-    // Already landscape – no rotation needed
-    canvas.width = width;
-    canvas.height = height;
-
-    context.filter = 'grayscale(0.3) contrast(1.2) brightness(1.1)';
-    context.drawImage(video, 0, 0, width, height);
-  }
-
+  // Save as a JPEG blob and enqueue it for upload
   canvas.toBlob(blob => {
     if (!blob) return;
     enqueueImage(blob);

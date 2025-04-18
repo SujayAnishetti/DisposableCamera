@@ -25,6 +25,18 @@
         width: 80%;
         max-width: 300px;
       }
+      #overlay-image {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100dvw;
+  height: 100dvh;
+  object-fit: fill;
+  z-index: 2;
+  pointer-events: none; /* Let clicks pass through */
+  display: none; /* Start hidden */
+}
+
 
       /* Camera interface styles */
       #camera-wrapper {
@@ -54,6 +66,9 @@
 
     <!-- Camera interface (hidden by default) -->
     <div id="camera-wrapper" style="display: none;">
+      <!-- Image overlay -->
+<img id="overlay-image" src="/overlay.png" alt="Overlay" style="display: none;" />
+
       <!-- Flip button in top right -->
       <button id="flip" class="flip-button" title="Flip Camera">↺</button>
 
@@ -78,20 +93,21 @@
     <script type="module" src="/src/main.ts"></script>
 
     <script>
-      // Fade out splash screen after 3 seconds and hide it
       const splash = document.getElementById('splash-screen');
       const cameraWrapper = document.getElementById('camera-wrapper');
-
+      const overlay = document.getElementById('overlay-image');
+    
       setTimeout(() => {
         splash.style.transition = "opacity 1s";
         splash.style.opacity = 0;
-        
-        // After fade-out, remove splash screen and display camera
+    
         setTimeout(() => {
-          splash.style.display = 'none';  // Hide splash screen
-          cameraWrapper.style.display = 'flex';  // Show camera interface
-        }, 1000); // Wait for the fade-out effect to complete (1 second)
-      }, 3000); // Wait for 3 seconds before starting fade-out
+          splash.style.display = 'none';           // Hide splash
+          cameraWrapper.style.display = 'flex';    // Show camera interface
+          overlay.style.display = 'block';         // Show overlay image
+        }, 1000); // After fade-out
+      }, 3000); // Wait 3 seconds before starting fade-out
     </script>
+    
   </body>
 </html>
